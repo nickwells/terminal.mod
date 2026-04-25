@@ -1,2 +1,2 @@
-# textattr
+# terminal
 terminal text attributes
