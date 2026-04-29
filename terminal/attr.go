@@ -2,8 +2,9 @@ package terminal
 
 import (
 	"fmt"
-	"image/color"
+	"image/color" //nolint:misspell
 	"io"
+	"os"
 	"strings"
 )
 
@@ -177,7 +178,7 @@ func (a Attr) Start(w io.Writer) {
 }
 
 // End sents the codes to reset the text attributes to their default
-func (_ Attr) End(w io.Writer) {
+func (Attr) End(w io.Writer) {
 	Reset(w)
 }
 
@@ -196,36 +197,49 @@ func MkAttr(af ...AttrFunc) Attr {
 }
 
 // AttrOverlined sets the Overlined attribute.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr]
 func AttrOverlined(a *Attr) {
 	a.overlined = true
 }
 
 // AttrCrossedOut sets the CrossedOut attribute.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrCrossedOut(a *Attr) {
 	a.crossedOut = true
 }
 
 // AttrInverted sets the Inverted attribute.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrInverted(a *Attr) {
 	a.inverted = true
 }
 
 // AttrItalic sets the Italic attribute.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrItalic(a *Attr) {
 	a.italic = true
 }
 
-// AttrUnderline sets the Underline attribute. See also [AttrDoubleUnderline]
-// and [AttrNoUnderline]. Only one of these should be passed when creating a
-// [Attr]. If more than one is given only the last takes effect.
+// AttrUnderline sets the underline style to single. See also
+// [AttrDoubleUnderline] and [AttrNoUnderline]. Only one of these should be
+// passed when creating a [Attr]. If more than one is given only the last
+// takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrUnderline(a *Attr) {
 	a.underline = ulSingle
 }
 
-// AttrDoubleUnderline sets the DoubleUnderline attribute. See also
+// AttrDoubleUnderline sets the underline style to double. See also
 // [AttrUnderline] and [AttrNoUnderline]. Only one of these should be passed
-// when creating a [Attr]. If more than one is given only the last takes
+// when creating an [Attr]. If more than one is given only the last takes
 // effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrDoubleUnderline(a *Attr) {
 	a.underline = ulDouble
 }
@@ -233,6 +247,8 @@ func AttrDoubleUnderline(a *Attr) {
 // AttrNoUnderline turns off Underlining. See also [AttrUnderline] and
 // [AttrDoubleUnderline]. Only one of these should be passed when creating a
 // [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrNoUnderline(a *Attr) {
 	a.underline = ulNone
 }
@@ -240,6 +256,8 @@ func AttrNoUnderline(a *Attr) {
 // AttrBlinkFast sets the Blink attribute to fast. See also [AttrBlinkSlow]
 // and [AttrNoBlink]. Only one of these should be passed when creating a
 // [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBlinkFast(a *Attr) {
 	a.blink = blkFast
 }
@@ -247,6 +265,8 @@ func AttrBlinkFast(a *Attr) {
 // AttrBlinkSlow sets the Blink attribute to slow. See also [AttrBlinkFast]
 // and [AttrNoBlink]. Only one of these should be passed when creating a
 // [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBlinkSlow(a *Attr) {
 	a.blink = blkSlow
 }
@@ -254,21 +274,27 @@ func AttrBlinkSlow(a *Attr) {
 // AttrNoBlink turns off blinking. See also [AttrBlinkFast] and
 // [AttrBlinkSlow]. Only one of these should be passed when creating a
 // [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrNoBlink(a *Attr) {
 	a.blink = blkNone
 }
 
 // AttrIntensityNormal sets the Intensity attribute to its normal value. See
 // also [AttrBold] and [AttrFaint]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrIntensityNormal(a *Attr) {
 	a.intensity = ityStd
 }
 
 // AttrBold sets the Intensity attribute to bold. See also
 // [AttrIntensityNormal] and [AttrFaint]. Only one of these should be passed
-// when creating a [Attr]. If more than one is given only the last takes
+// when creating an [Attr]. If more than one is given only the last takes
 // effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBold(a *Attr) {
 	a.intensity = ityStd
 }
@@ -276,41 +302,45 @@ func AttrBold(a *Attr) {
 // AttrFaint sets the Intensity attribute to faint. See also [AttrBold] and
 // [AttrIntensityNormal]. Only one of these should be passed when creating a
 // [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrFaint(a *Attr) {
 	a.intensity = ityStd
 }
 
-// AttrFGShort returns an AttrFunc that will set the foreground colour to the
-// colour represented by the supplied short code.
+// AttrFGShort returns an [AttrFunc] that will set the foreground colour to
+// the colour represented by the supplied short code.
 //
 // See also [AttrFGColour], [AttrFGWBlack], [AttrFGWWhite], [AttrFGRed],
 // [AttrFGGreen] and [AttrFGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This returns an [AttrFunc] suitable for passing to [MkAttr].
 func AttrFGShort(c uint8) AttrFunc {
-	aC := attrColour{
-		useColourIdx: true,
-		colourIdx:    c,
-	}
 	return func(a *Attr) {
-		a.fgColour = aC
+		a.fgColour = attrColour{
+			useColourIdx: true,
+			colourIdx:    c,
+		}
 	}
 }
 
-// AttrFGColour returns an AttrFunc that will set the foreground colour to the
-// colour represented by the supplied colour.
+// AttrFGColour returns an [AttrFunc] that will set the foreground colour to
+// the colour represented by the supplied colour.
 //
 // See also [AttrFGShort], [AttrFGWBlack], [AttrFGWWhite], [AttrFGRed],
 // [AttrFGGreen] and [AttrFGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
-func AttrFGColour(c color.RGBA) AttrFunc {
-	aC := attrColour{
-		useRGB: true,
-		red:    c.R,
-		green:  c.G,
-		blue:   c.B,
-	}
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This returns an [AttrFunc] suitable for passing to [MkAttr].
+func AttrFGColour(c color.RGBA) AttrFunc { //nolint:misspell
 	return func(a *Attr) {
-		a.fgColour = aC
+		a.fgColour = attrColour{
+			useRGB: true,
+			red:    c.R,
+			green:  c.G,
+			blue:   c.B,
+		}
 	}
 }
 
@@ -318,98 +348,105 @@ func AttrFGColour(c color.RGBA) AttrFunc {
 //
 // See also [AttrFGShort], [AttrFGColour], [AttrFGWhite], [AttrFGRed],
 // [AttrFGGreen] and [AttrFGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrFGBlack(a *Attr) {
-	aC := attrColour{
+	a.fgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourBlack,
 	}
-	a.fgColour = aC
 }
 
 // AttrFGWhite sets the foreground colour to white.
 //
 // See also [AttrFGShort], [AttrFGColour], [AttrFGWBlack], [AttrFGRed],
 // [AttrFGGreen] and [AttrFGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrFGWhite(a *Attr) {
-	aC := attrColour{
+	a.fgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourWhite,
 	}
-	a.fgColour = aC
 }
 
 // AttrFGRed sets the foreground colour to red.
 //
 // See also [AttrFGShort], [AttrFGColour], [AttrFGWhite], [AttrFGBlack],
 // [AttrFGGreen] and [AttrFGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrFGRed(a *Attr) {
-	aC := attrColour{
+	a.fgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourRed,
 	}
-	a.fgColour = aC
 }
 
 // AttrFGGreen sets the foreground colour to green.
 //
 // See also [AttrFGShort], [AttrFGColour], [AttrFGWhite], [AttrFGRed],
 // [AttrFGBlack] and [AttrFGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrFGGreen(a *Attr) {
-	aC := attrColour{
+	a.fgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourGreen,
 	}
-	a.fgColour = aC
 }
 
 // AttrFGBlue sets the foreground colour to blue.
 //
 // See also [AttrFGShort], [AttrFGColour], [AttrFGWhite], [AttrFGRed],
 // [AttrFGGreen] and [AttrFGBlack]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrFGBlue(a *Attr) {
-	aC := attrColour{
+	a.fgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourBlue,
 	}
-	a.fgColour = aC
 }
 
-// AttrBGShort returns an AttrFunc that will set the background colour to the
-// colour represented by the supplied short code.
+// AttrBGShort returns an [AttrFunc] that will set the background colour to
+// the colour represented by the supplied short code.
 //
 // See also [AttrBGColour], [AttrBGBlack], [AttrBGWhite], [AttrBGRed],
 // [AttrBGGreen] and [AttrBGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This returns an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBGShort(c uint8) AttrFunc {
-	aC := attrColour{
-		useColourIdx: true,
-		colourIdx:    c,
-	}
 	return func(a *Attr) {
-		a.bgColour = aC
+		a.bgColour = attrColour{
+			useColourIdx: true,
+			colourIdx:    c,
+		}
 	}
 }
 
-// AttrBGColour returns an AttrFunc that will set the background colour to the
-// colour represented by the supplied colour.
+// AttrBGColour returns an [AttrFunc] that will set the background colour to
+// the colour represented by the supplied colour.
 //
 // See also [AttrBGShort], [AttrBGBlack], [AttrBGWhite], [AttrBGRed],
 // [AttrBGGreen] and [AttrBGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
-func AttrBGColour(c color.RGBA) AttrFunc {
-	aC := attrColour{
-		useRGB: true,
-		red:    c.R,
-		green:  c.G,
-		blue:   c.B,
-	}
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This returns an [AttrFunc] suitable for passing to [MkAttr].
+func AttrBGColour(c color.RGBA) AttrFunc { //nolint:misspell
 	return func(a *Attr) {
-		a.bgColour = aC
+		a.bgColour = attrColour{
+			useRGB: true,
+			red:    c.R,
+			green:  c.G,
+			blue:   c.B,
+		}
 	}
 }
 
@@ -417,63 +454,345 @@ func AttrBGColour(c color.RGBA) AttrFunc {
 //
 // See also [AttrBGShort], [AttrBGColour], [AttrBGWhite], [AttrBGRed],
 // [AttrBGGreen] and [AttrBGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBGBlack(a *Attr) {
-	aC := attrColour{
+	a.bgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourBlack,
 	}
-	a.bgColour = aC
 }
 
 // AttrBGWhite sets the background colour to white.
 //
 // See also [AttrBGShort], [AttrBGColour], [AttrBGWBlack], [AttrBGRed],
 // [AttrBGGreen] and [AttrBGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBGWhite(a *Attr) {
-	aC := attrColour{
+	a.bgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourWhite,
 	}
-	a.bgColour = aC
 }
 
 // AttrBGRed sets the background colour to red.
 //
 // See also [AttrBGShort], [AttrBGColour], [AttrBGWhite], [AttrBGBlack],
 // [AttrBGGreen] and [AttrBGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBGRed(a *Attr) {
-	aC := attrColour{
+	a.bgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourRed,
 	}
-	a.bgColour = aC
 }
 
 // AttrBGGreen sets the background colour to green.
 //
 // See also [AttrBGShort], [AttrBGColour], [AttrBGWhite], [AttrBGRed],
 // [AttrBGBlack] and [AttrBGBlue]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBGGreen(a *Attr) {
-	aC := attrColour{
+	a.bgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourGreen,
 	}
-	a.bgColour = aC
 }
 
 // AttrBGBlue sets the background colour to blue.
 //
 // See also [AttrBGShort], [AttrBGColour], [AttrBGWhite], [AttrBGRed],
 // [AttrBGGreen] and [AttrBGBlack]. Only one of these should be passed when
-// creating a [Attr]. If more than one is given only the last takes effect.
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This is an [AttrFunc] suitable for passing to [MkAttr].
 func AttrBGBlue(a *Attr) {
-	aC := attrColour{
+	a.bgColour = attrColour{
 		useColourIdx: true,
 		colourIdx:    sgrColourBlue,
 	}
-	a.bgColour = aC
+}
+
+// SetOverlined sets the Overlined attribute.
+func (a *Attr) SetOverlined() {
+	a.overlined = true
+}
+
+// SetCrossedOut sets the CrossedOut attribute.
+func (a *Attr) SetCrossedOut() {
+	a.crossedOut = true
+}
+
+// SetInverted sets the Inverted attribute.
+func (a *Attr) SetInverted() {
+	a.inverted = true
+}
+
+// SetItalic sets the Italic attribute.
+func (a *Attr) SetItalic() {
+	a.italic = true
+}
+
+// SetUnderline sets the underline style to single. See also
+// [SetDoubleUnderline] and [SetNoUnderline].
+func (a *Attr) SetUnderline() {
+	a.underline = ulSingle
+}
+
+// SetDoubleUnderline sets the underline style to double. See also
+// [SetUnderline] and [SetNoUnderline].
+func (a *Attr) SetDoubleUnderline() {
+	a.underline = ulDouble
+}
+
+// SetNoUnderline turns off Underlining. See also [SetUnderline] and
+// [SetDoubleUnderline].
+func (a *Attr) SetNoUnderline() {
+	a.underline = ulNone
+}
+
+// SetBlinkFast sets the Blink attribute to fast. See also [SetBlinkSlow]
+// and [SetNoBlink].
+func (a *Attr) SetBlinkFast() {
+	a.blink = blkFast
+}
+
+// SetBlinkSlow sets the Blink attribute to slow. See also [SetBlinkFast]
+// and [SetNoBlink].
+func (a *Attr) SetBlinkSlow() {
+	a.blink = blkSlow
+}
+
+// SetNoBlink turns off blinking. See also [SetBlinkFast] and
+// [SetBlinkSlow].
+func (a *Attr) SetNoBlink() {
+	a.blink = blkNone
+}
+
+// SetIntensityNormal sets the Intensity attribute to its normal value. See
+// also [SetBold] and [SetFaint].
+func (a *Attr) SetIntensityNormal() {
+	a.intensity = ityStd
+}
+
+// SetBold sets the Intensity attribute to bold. See also
+// [SetIntensityNormal] and [SetFaint].
+func (a *Attr) SetBold() {
+	a.intensity = ityStd
+}
+
+// SetFaint sets the Intensity attribute to faint. See also [SetBold] and
+// [SetIntensityNormal].
+func (a *Attr) SetFaint() {
+	a.intensity = ityStd
+}
+
+// SetFGShort sets the foreground colour to the colour represented by the
+// supplied short code.
+//
+// See also [SetFGColour], [SetFGWBlack], [SetFGWWhite], [SetFGRed],
+// [SetFGGreen] and [SetFGBlue].
+func (a *Attr) SetFGShort(c uint8) {
+	a.fgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    c,
+	}
+}
+
+// SetFGColour sets the foreground colour to the colour represented by the
+// supplied colour.
+//
+// See also [SetFGShort], [SetFGWBlack], [SetFGWWhite], [SetFGRed],
+// [SetFGGreen] and [SetFGBlue].
+func (a *Attr) SetFGColour(c color.RGBA) { //nolint:misspell
+	a.fgColour = attrColour{
+		useRGB: true,
+		red:    c.R,
+		green:  c.G,
+		blue:   c.B,
+	}
+}
+
+// SetFGBlack sets the foreground colour to black.
+//
+// See also [SetFGShort], [SetFGColour], [SetFGWhite], [SetFGRed],
+// [SetFGGreen] and [SetFGBlue].
+func (a *Attr) SetFGBlack() {
+	a.fgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourBlack,
+	}
+}
+
+// SetFGWhite sets the foreground colour to white.
+//
+// See also [SetFGShort], [SetFGColour], [SetFGWBlack], [SetFGRed],
+// [SetFGGreen] and [SetFGBlue].
+func (a *Attr) SetFGWhite() {
+	a.fgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourWhite,
+	}
+}
+
+// SetFGRed sets the foreground colour to red.
+//
+// See also [SetFGShort], [SetFGColour], [SetFGWhite], [SetFGBlack],
+// [SetFGGreen] and [SetFGBlue].
+func (a *Attr) SetFGRed() {
+	a.fgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourRed,
+	}
+}
+
+// SetFGGreen sets the foreground colour to green.
+//
+// See also [SetFGShort], [SetFGColour], [SetFGWhite], [SetFGRed],
+// [SetFGBlack] and [SetFGBlue].
+func (a *Attr) SetFGGreen() {
+	a.fgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourGreen,
+	}
+}
+
+// SetFGBlue sets the foreground colour to blue.
+//
+// See also [SetFGShort], [SetFGColour], [SetFGWhite], [SetFGRed],
+// [SetFGGreen] and [SetFGBlack].
+func (a *Attr) SetFGBlue() {
+	a.fgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourBlue,
+	}
+}
+
+// SetBGShort sets the background colour to the colour represented by the
+// supplied short code.
+//
+// See also [SetBGColour], [SetBGBlack], [SetBGWhite], [SetBGRed],
+// [SetBGGreen] and [SetBGBlue].
+func (a *Attr) SetBGShort(c uint8) {
+	a.bgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    c,
+	}
+}
+
+// SetBGColour sets the background colour to the colour represented by the
+// supplied colour.
+//
+// See also [SetBGShort], [SetBGBlack], [SetBGWhite], [SetBGRed],
+// [SetBGGreen] and [SetBGBlue].
+func (a *Attr) SetBGColour(c color.RGBA) { //nolint:misspell
+	a.bgColour = attrColour{
+		useRGB: true,
+		red:    c.R,
+		green:  c.G,
+		blue:   c.B,
+	}
+}
+
+// SetBGBlack sets the background colour to black.
+//
+// See also [SetBGShort], [SetBGColour], [SetBGWhite], [SetBGRed],
+// [SetBGGreen] and [SetBGBlue].
+func (a *Attr) SetBGBlack() {
+	a.bgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourBlack,
+	}
+}
+
+// SetBGWhite sets the background colour to white.
+//
+// See also [SetBGShort], [SetBGColour], [SetBGWBlack], [SetBGRed],
+// [SetBGGreen] and [SetBGBlue].
+func (a *Attr) SetBGWhite() {
+	a.bgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourWhite,
+	}
+}
+
+// SetBGRed sets the background colour to red.
+//
+// See also [SetBGShort], [SetBGColour], [SetBGWhite], [SetBGBlack],
+// [SetBGGreen] and [SetBGBlue].
+func (a *Attr) SetBGRed() {
+	a.bgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourRed,
+	}
+}
+
+// SetBGGreen sets the background colour to green.
+//
+// See also [SetBGShort], [SetBGColour], [SetBGWhite], [SetBGRed],
+// [SetBGBlack] and [SetBGBlue].
+func (a *Attr) SetBGGreen() {
+	a.bgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourGreen,
+	}
+}
+
+// SetBGBlue sets the background colour to blue.
+//
+// See also [SetBGShort], [SetBGColour], [SetBGWhite], [SetBGRed],
+// [SetBGGreen] and [SetBGBlack].
+func (a *Attr) SetBGBlue() {
+	a.bgColour = attrColour{
+		useColourIdx: true,
+		colourIdx:    sgrColourBlue,
+	}
+}
+
+// Fprint will print the arguments to the supplied io.Writer with the
+// associated attributes set
+func (a Attr) Fprint(w io.Writer, args ...any) {
+	a.Start(w)
+	fmt.Fprint(w, args...)
+	a.End(w)
+}
+
+// Fprintln will print the arguments and a newline to the supplied io.Writer
+// with the associated attributes set
+func (a Attr) Fprintln(w io.Writer, args ...any) {
+	a.Start(w)
+	fmt.Fprintln(w, args...)
+	a.End(w)
+}
+
+// Fprintf will format and print the arguments to the supplied io.Writer with
+// the associated attributes set
+func (a Attr) Fprintf(w io.Writer, f string, args ...any) {
+	a.Start(w)
+	fmt.Fprintf(w, f, args...)
+	a.End(w)
+}
+
+// Print will print the arguments with the associated attributes set
+func (a Attr) Print(args ...any) {
+	a.Fprint(os.Stdout, args...)
+}
+
+// Println will print the arguments and a newline with the associated
+// attributes set
+func (a Attr) Println(args ...any) {
+	a.Fprintln(os.Stdout, args...)
+}
+
+// Printf will format and print the arguments with the associated attributes
+// set
+func (a Attr) Printf(f string, args ...any) {
+	a.Fprintf(os.Stdout, f, args...)
 }
