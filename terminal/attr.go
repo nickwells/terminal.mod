@@ -33,12 +33,25 @@ const (
 	sgrBGColour        = "48"
 	sgrOverlined       = "53"
 
-	sgrColourBlack = 1
+	sgrColourBlack = 0
+	// sgrColourStdRed     = 1
+	// sgrColourStdGreen   = 2
+	// sgrColourStdYellow  = 3
+	// sgrColourStdBlue    = 4
+	// sgrColourStdMagenta = 5
+	// sgrColourStdCyan    = 6
+	// sgrColourPaleGrey   = 7
+	// sgrColourDarkGrey   = 8
+	sgrColourHIRed   = 9
+	sgrColourHIGreen = 10
+	// sgrColourHIYellow   = 11
+	sgrColourHIBlue = 12
+	// sgrColourHIMagenta  = 13
+	// sgrColourHICyan     = 14
 	sgrColourWhite = 15
-	sgrColourRed   = 9
-	sgrColourGreen = 10
-	sgrColourBlue  = 12
 )
+
+// Underlining
 
 type underlineStyle int
 
@@ -54,6 +67,8 @@ var underlineMap = map[underlineStyle]string{
 	ulDouble: sgrDoubleUnderline,
 }
 
+// Blinking
+
 type blinkStyle int
 
 const (
@@ -67,6 +82,8 @@ var blinkMap = map[blinkStyle]string{
 	blkSlow: sgrBlinkSlow,
 	blkFast: sgrBlinkFast,
 }
+
+// Intensity
 
 type intensityStyle int
 
@@ -308,6 +325,46 @@ func AttrFaint(a *Attr) {
 	a.intensity = ityStd
 }
 
+// AttrFGGrey returns an [AttrFunc] that will set the foreground
+// colour to the colour on a grey scale where 0
+// represents black and 255 represents white.
+//
+// See also [AttrFGColour], [AttrFGWBlack], [AttrFGWWhite], [AttrFGRed],
+// [AttrFGGreen] and [AttrFGBlue]. Only one of these should be passed when
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This returns an [AttrFunc] suitable for passing to [MkAttr].
+func AttrFGGrey(g uint8) AttrFunc {
+	return func(a *Attr) {
+		a.fgColour = attrColour{
+			useRGB: true,
+			red:    g,
+			green:  g,
+			blue:   g,
+		}
+	}
+}
+
+// AttrBGGrey returns an [AttrFunc] that will set the foreground
+// colour to the colour on a grey scale where 0
+// represents black and 255 represents white.
+//
+// See also [AttrBGColour], [AttrBGWBlack], [AttrBGWWhite], [AttrBGRed],
+// [AttrBGGreen] and [AttrBGBlue]. Only one of these should be passed when
+// creating an [Attr]. If more than one is given only the last takes effect.
+//
+// This returns an [AttrFunc] suitable for passing to [MkAttr].
+func AttrBGGrey(g uint8) AttrFunc {
+	return func(a *Attr) {
+		a.bgColour = attrColour{
+			useRGB: true,
+			red:    g,
+			green:  g,
+			blue:   g,
+		}
+	}
+}
+
 // AttrFGShort returns an [AttrFunc] that will set the foreground colour to
 // the colour represented by the supplied short code.
 //
@@ -382,7 +439,7 @@ func AttrFGWhite(a *Attr) {
 func AttrFGRed(a *Attr) {
 	a.fgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourRed,
+		colourIdx:    sgrColourHIRed,
 	}
 }
 
@@ -396,7 +453,7 @@ func AttrFGRed(a *Attr) {
 func AttrFGGreen(a *Attr) {
 	a.fgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourGreen,
+		colourIdx:    sgrColourHIGreen,
 	}
 }
 
@@ -410,7 +467,7 @@ func AttrFGGreen(a *Attr) {
 func AttrFGBlue(a *Attr) {
 	a.fgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourBlue,
+		colourIdx:    sgrColourHIBlue,
 	}
 }
 
@@ -488,7 +545,7 @@ func AttrBGWhite(a *Attr) {
 func AttrBGRed(a *Attr) {
 	a.bgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourRed,
+		colourIdx:    sgrColourHIRed,
 	}
 }
 
@@ -502,7 +559,7 @@ func AttrBGRed(a *Attr) {
 func AttrBGGreen(a *Attr) {
 	a.bgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourGreen,
+		colourIdx:    sgrColourHIGreen,
 	}
 }
 
@@ -516,7 +573,7 @@ func AttrBGGreen(a *Attr) {
 func AttrBGBlue(a *Attr) {
 	a.bgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourBlue,
+		colourIdx:    sgrColourHIBlue,
 	}
 }
 
@@ -594,6 +651,36 @@ func (a *Attr) SetFaint() {
 	a.intensity = ityStd
 }
 
+// SetFGGrey returns an [AttrFunc] that will set the foreground
+// colour to the colour on a grey scale where 0
+// represents black and 255 represents white.
+//
+// See also [SetFGColour], [SetFGWBlack], [SetFGWWhite], [SetFGRed],
+// [SetFGGreen] and [SetFGBlue].
+func (a *Attr) SetFGGrey(g uint8) {
+	a.fgColour = attrColour{
+		useRGB: true,
+		red:    g,
+		green:  g,
+		blue:   g,
+	}
+}
+
+// SetBGGrey returns an [AttrFunc] that will set the foreground
+// colour to the colour on a grey scale where 0
+// represents black and 255 represents white.
+//
+// See also [SetBGColour], [SetBGWBlack], [SetBGWWhite], [SetBGRed],
+// [SetBGGreen] and [SetBGBlue].
+func (a *Attr) SetBGGrey(g uint8) {
+	a.bgColour = attrColour{
+		useRGB: true,
+		red:    g,
+		green:  g,
+		blue:   g,
+	}
+}
+
 // SetFGShort sets the foreground colour to the colour represented by the
 // supplied short code.
 //
@@ -649,7 +736,7 @@ func (a *Attr) SetFGWhite() {
 func (a *Attr) SetFGRed() {
 	a.fgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourRed,
+		colourIdx:    sgrColourHIRed,
 	}
 }
 
@@ -660,7 +747,7 @@ func (a *Attr) SetFGRed() {
 func (a *Attr) SetFGGreen() {
 	a.fgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourGreen,
+		colourIdx:    sgrColourHIGreen,
 	}
 }
 
@@ -671,7 +758,7 @@ func (a *Attr) SetFGGreen() {
 func (a *Attr) SetFGBlue() {
 	a.fgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourBlue,
+		colourIdx:    sgrColourHIBlue,
 	}
 }
 
@@ -730,7 +817,7 @@ func (a *Attr) SetBGWhite() {
 func (a *Attr) SetBGRed() {
 	a.bgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourRed,
+		colourIdx:    sgrColourHIRed,
 	}
 }
 
@@ -741,7 +828,7 @@ func (a *Attr) SetBGRed() {
 func (a *Attr) SetBGGreen() {
 	a.bgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourGreen,
+		colourIdx:    sgrColourHIGreen,
 	}
 }
 
@@ -752,7 +839,7 @@ func (a *Attr) SetBGGreen() {
 func (a *Attr) SetBGBlue() {
 	a.bgColour = attrColour{
 		useColourIdx: true,
-		colourIdx:    sgrColourBlue,
+		colourIdx:    sgrColourHIBlue,
 	}
 }
 
